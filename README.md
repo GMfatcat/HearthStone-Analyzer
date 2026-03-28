@@ -1,61 +1,66 @@
 # HearthStone Analyzer
 
-HearthStone Analyzer is a single-container deck analysis app for Hearthstone.
-It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and can generate AI reports through an OpenAI-compatible endpoint such as local Ollama.
+[![Cover](cover.png)](cover.png)
 
-## What It Does
+🌐 Language: **English** | [繁體中文](README.zh-TW.md)
 
-Current usable features:
+HearthStone Analyzer is a single-container Hearthstone deck analysis app.
+It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and generates AI reports through an OpenAI-compatible endpoint such as local Ollama.
 
-- sync collectible cards from HearthstoneJSON into local SQLite
-- parse Hearthstone deck codes into card lists with legality checks
-- run rule-based deck analysis with:
+## ✨ What It Is
+> Quick take: This project helps you go from a raw deck code to structured analysis, meta comparison, and an AI-written report in one place.
+
+- Parse Hearthstone deck codes into card lists with legality checks
+- Run deterministic deck analysis with:
   - archetype classification
-  - confidence scoring and confidence reasons
+  - confidence reasons
   - structural tag explanations
   - package analysis
   - suggested adds and cuts
-- compare your deck against persisted meta decks with:
+- Compare your deck against stored meta decks with:
   - ranked candidates
   - similarity breakdown
-  - shared / missing card diff
+  - shared and missing card diff
   - merged guidance with source, support, and confidence
-- generate AI deck reports through an OpenAI-compatible chat API
-- store and replay past reports
-- manage app settings in the UI
-- run built-in jobs from the UI:
-  - `sync_cards`
-  - `sync_meta`
-  - `rebuild_features`
-- switch the UI between English and Traditional Chinese
+- Generate AI deck reports through an OpenAI-compatible chat API
+- Store report history and reopen previous results
+- Switch the UI between English and Traditional Chinese
 
-## Architecture
+## 🧱 Architecture
+> Quick take: The system stays intentionally small and deployable, with one app, one database, and one container.
 
-The project is intentionally simple to deploy:
-
-- single Go application
+- Single Go application
 - Vue frontend embedded into the Go binary
-- SQLite only
-- in-process scheduler
-- single-container deployment target
+- SQLite storage
+- In-process scheduler
+- Single-container deployment target
 
 There is no Redis, PostgreSQL, or multi-service orchestration requirement for the current product shape.
 
-## Main Screens
+## 🖥️ Main Screens
+> Quick take: The web UI covers the full working loop from input, to analysis, to compare, to saved reports.
 
-The web UI currently includes:
+- Deck input with `Parse`, `Analyze`, `Compare`, and `Generate Report`
+- Analysis view with structural and package reads
+- Compare view with candidate decks and merged guidance
+- Report view with saved history replay
+- Meta snapshot overview
+- Jobs control panel
+- Settings page for LLM configuration
 
-- deck input and parse/analyze/compare/report actions
-- analysis view with structural and package reads
-- compare view with candidate decks and merged guidance
-- report view with saved history replay
-- meta snapshot overview
-- scheduler/jobs control
-- settings page for LLM configuration
+## 🎯 Core Features
+> Quick take: Most of the product value is already in place for local use and first deployment.
 
-## Where To Get Deck Codes
+- Card sync from HearthstoneJSON into local SQLite
+- Persisted card-level metadata and functional tags
+- Hearthstone-specific package taxonomy
+- Compare-aware merged guidance
+- Local Ollama support through OpenAI-compatible APIs
+- Saved report replay
+- Bilingual UI shell
 
-You can paste standard Hearthstone deck codes from places like:
+## 🃏 Where To Get Deck Codes
+> Quick take: You can copy deck codes from popular Hearthstone sites and paste them directly into the app.
 
 - [Hearthstone Top Decks](https://www.hearthstonetopdecks.com/)
 - [Vicious Syndicate](https://www.vicioussyndicate.com/)
@@ -69,19 +74,21 @@ You can also use this sample deck code for quick testing:
 AAIB8eEEAA-zAY0Qt2ziygLP0QPboASFoQSC5ASL7AWi-gXHpAbd5QaKsQeEAZ4BAA
 ```
 
-## Project Docs
+## 📚 Project Docs
+> Quick take: These docs cover product scope, implementation state, deployment, and backup procedures.
 
-Primary docs:
+- [README.zh-TW.md](README.zh-TW.md)
+- [PRD_v2.md](PRD_v2.md)
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
+- [CURRENT_PROGRESS.md](CURRENT_PROGRESS.md)
+- [DEPLOYMENT.md](DEPLOYMENT.md)
+- [BACKUP_RESTORE.md](BACKUP_RESTORE.md)
 
-- [PRD_v2.md](D:\HearthStone\PRD_v2.md)
-- [IMPLEMENTATION_PLAN.md](D:\HearthStone\IMPLEMENTATION_PLAN.md)
-- [CURRENT_PROGRESS.md](D:\HearthStone\CURRENT_PROGRESS.md)
-- [DEPLOYMENT.md](D:\HearthStone\DEPLOYMENT.md)
-- [BACKUP_RESTORE.md](D:\HearthStone\BACKUP_RESTORE.md)
-
-## Local Development
+## 🛠️ Local Development
+> Quick take: The repo supports a straightforward Go backend workflow plus a separate Vue frontend build loop.
 
 ### Backend
+> Quick take: The backend is a standard Go app with direct test and run commands.
 
 Requirements:
 
@@ -125,8 +132,7 @@ Useful environment variables:
 - `APP_META_REMOTE_PROFILE`
 
 ### Frontend
-
-The frontend is built with Vue + Vite and outputs to `web/dist/`.
+> Quick take: The frontend uses Vue + Vite and must be built before Go embed-based verification.
 
 Commands:
 
@@ -154,11 +160,12 @@ $env:PATH='C:\Program Files\nodejs;' + $env:PATH
 & 'C:\Program Files\nodejs\npm.cmd' run build
 ```
 
-### Important Build Order
+### Build Order
+> Quick take: Because the Go app embeds `web/dist`, frontend build output must exist before final Go verification.
 
-The Go app embeds files from `web/dist` via [web/embed.go](D:\HearthStone\web\embed.go).
+The Go app embeds files from `web/dist` via `web/embed.go`.
 
-After frontend changes, use this final verification order:
+Recommended verification order:
 
 ```bash
 cd web
@@ -168,11 +175,10 @@ cd ..
 go test ./...
 ```
 
-If `go test ./...` fails with an embed error like `web\embed.go: pattern dist/*: no matching files found`, rebuild the frontend first.
+If `go test ./...` fails with `web\embed.go: pattern dist/*: no matching files found`, rebuild the frontend first.
 
-## API Surface
-
-Current endpoints:
+## 🔌 API Surface
+> Quick take: The API already covers settings, cards, decks, jobs, meta snapshots, and report generation.
 
 - `GET /healthz`
 - `GET /api/settings`
@@ -195,23 +201,27 @@ Current endpoints:
 - `GET /api/meta`
 - `GET /api/meta/{id}`
 
-## Deployment
+## 🚀 Deployment
+> Quick take: The app is designed for simple Docker deployment with a persistent `/data` mount.
 
-For the full deployment guide, see [DEPLOYMENT.md](D:\HearthStone\DEPLOYMENT.md).
+For the full deployment guide, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### Docker Build
+> Quick take: Build one image and use the same artifact for local testing or first deployment.
 
 ```bash
 docker build -t hearthstone-analyzer:dev .
 ```
 
 ### Basic Docker Run
+> Quick take: This is the fastest way to boot the app without persistence.
 
 ```bash
 docker run --rm -p 8080:8080 hearthstone-analyzer:dev
 ```
 
 ### Recommended Persistent Run
+> Quick take: Use a volume or bind mount so the SQLite database and saved settings survive restarts.
 
 Named volume:
 
@@ -237,10 +247,11 @@ docker run -d \
   hearthstone-analyzer:dev
 ```
 
-Important:
+### `APP_SETTINGS_KEY`
+> Quick take: This key must be a raw 32-character string or encrypted settings will break.
 
-- `APP_SETTINGS_KEY` must be a raw 32-character string
-- do not use a 64-character hex string from `openssl rand -hex 32`
+- Use a raw 32-character string
+- Do not use a 64-character hex string from `openssl rand -hex 32`
 
 Example valid key:
 
@@ -248,11 +259,11 @@ Example valid key:
 m7Kp2Qx9Lr4Vz8Nc1Tw6By3Hs5Df0GaJ
 ```
 
-## Windows Docker + Local Ollama
-
-This path has been validated locally.
+## 🪟 Windows Docker + Local Ollama
+> Quick take: This exact path has already been validated locally on Windows.
 
 ### Start the Container
+> Quick take: Build the image, mount a local data folder, and expose port `8080`.
 
 ```powershell
 cd D:\HearthStone
@@ -267,6 +278,7 @@ docker run -d `
 ```
 
 ### Configure Ollama in the UI
+> Quick take: Point the app at the host machine through `host.docker.internal`, not `localhost`.
 
 Open `http://localhost:8080` and set:
 
@@ -280,10 +292,11 @@ Example local model:
 
 Why `host.docker.internal`:
 
-- inside Docker, `localhost` points at the container
+- Inside Docker, `localhost` points at the container
 - `host.docker.internal` points back to the Windows host running Ollama
 
 ### Validate Ollama
+> Quick take: Confirm the local model responds, then run the app's full parse-to-report flow.
 
 Host-side quick check:
 
@@ -293,44 +306,28 @@ Invoke-RestMethod http://localhost:11434/v1/models
 
 Then in the app:
 
-1. run `sync_cards`
-2. paste a deck code
-3. click `Parse`
-4. click `Analyze`
-5. click `Generate Report`
+1. Run `sync_cards`
+2. Paste a deck code
+3. Click `Parse`
+4. Click `Analyze`
+5. Click `Generate Report`
 
-## First-Start Smoke Test
-
-Recommended checklist after startup:
+## ✅ First-Start Smoke Test
+> Quick take: These checks confirm the deployed app is healthy end to end.
 
 1. `GET /healthz` returns `ok`
-2. UI loads
-3. settings can be saved
+2. The UI loads
+3. Settings can be saved
 4. `sync_cards` succeeds
-5. parse works
-6. analyze works
-7. compare works if meta is available
-8. report generation works
-9. recent report replay works
+5. Parse works
+6. Analyze works
+7. Compare works if meta is available
+8. Report generation works
+9. Recent report replay works
 10. UI language switch persists after refresh
 
-## Current Notes
-
-- the runtime image includes `ca-certificates`, which is required for HTTPS card sync
-- report generation timeout has been sized to better tolerate slower local Ollama inference
-- `Analyze` is partially localized without calling an external translation service
-- report language now follows the UI language for LLM-generated output
-
-## Backup and Restore
-
-See [BACKUP_RESTORE.md](D:\HearthStone\BACKUP_RESTORE.md).
-
-At minimum, back up your SQLite file before upgrades:
-
-- `/data/hearthstone.db` inside the container
-- or your host-mounted `data` directory if using a bind mount
-
-## Validation Status
+## 🧪 Validation Status
+> Quick take: Backend tests, frontend tests, Docker startup, and local Ollama reporting have all been exercised.
 
 Last confirmed verification:
 
@@ -339,21 +336,33 @@ Last confirmed verification:
   - `npm test`
   - `npm run build`
 - Windows Docker local deployment
-- local Ollama report generation
+- Local Ollama report generation
 
-## Known Limitations
+## ⚠️ Known Limitations
+> Quick take: The first release is functional, but some localization and long-tail data polish still remain.
 
-- some analyze/report wording is still partly English depending on content source
-- remote meta card-name normalization still has edge cases
-- frontend automated coverage is still fairly light
-- scheduler logging/retention is still basic
+- Some analyze and report wording is still partly English depending on content source
+- Remote meta card-name normalization still has edge cases
+- Frontend automated coverage is still fairly light
+- Scheduler logging and retention are still basic
 
-## Dev Container
+## 💾 Backup and Restore
+> Quick take: Back up the SQLite file before upgrades so settings, reports, and synced data are safe.
+
+See [BACKUP_RESTORE.md](BACKUP_RESTORE.md).
+
+At minimum, back up:
+
+- `/data/hearthstone.db` inside the container
+- Or your host-mounted `data` directory if using a bind mount
+
+## 🧰 Dev Container
+> Quick take: A dev container is included if you want a more repeatable local toolchain.
 
 The repository includes a Dev Container with:
 
 - Go
 - Node.js
-- common build tooling
+- Common build tooling
 
 Use it if you want a consistent local environment for backend and frontend work.
