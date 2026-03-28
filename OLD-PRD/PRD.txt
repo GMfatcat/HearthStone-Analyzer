@@ -1,0 +1,1092 @@
+# Go 為主的 Hearthstone 牌組分析系統 MVP 規劃書
+
+## 1. 專案目標
+
+建立一套以 **Go 為主** 的 Hearthstone 牌組分析系統，支援：
+
+* 定期同步卡牌資料
+* 定期同步主流牌組 / meta 資料
+* 讓使用者輸入 deck code 或手動選牌
+* 對指定牌組做結構化分析
+* 與目前熱門牌組做比較
+* 產出 AI 輔助的自然語言報告
+
+MVP 階段先聚焦在：
+
+* **資料可穩定同步**
+* **牌組可被正確解析**
+* **可做 rule-based 分析**
+* **可與熱門牌組做基本比較**
+* **可生成一份可讀的分析報告**
+
+先不追求：
+
+* 極高精度勝率預測
+* 即時對戰模擬器
+* 完整自動化 deck builder
+* 複雜機器學習訓練流程
+
+---
+
+## 2. MVP 範圍
+
+## 2.1 In Scope
+
+### 資料同步
+
+* 同步卡牌靜態資料
+* 同步可收集卡資料
+* 同步熱門牌組資料
+* 同步 meta snapshot
+* 保存原始資料快照
+
+### 牌組分析
+
+* 解析 deck code
+* 計算 mana curve
+* 計算牌種分布
+* 檢查核心卡 / 協同特徵
+* 推定 archetype
+* 估計前中後期強度
+* 估計穩定性與卡手風險
+* 與熱門牌組做結構相似度比較
+
+### AI 報告
+
+* 生成牌組摘要
+* 生成優勢 / 劣勢分析
+* 生成調整建議
+* 生成與熱門牌組比較結論
+
+### 介面
+
+* 提供 HTTP API
+* 提供簡單 Web UI 或最小內部管理頁
+* 提供 CLI 工具方便排程
+
+## 2.2 Out of Scope
+
+* 自動打牌 bot
+* 模擬完整對局樹
+* 真正的 matchup engine
+* 完整排行榜 / 玩家個人資料追蹤
+* 多遊戲支援
+* 大規模 ML 訓練平台
+
+---
+
+## 3. 使用情境
+
+## 3.1 一般使用者分析自己的牌組
+
+使用者貼入一個 deck code，系統輸出：
+
+* 牌組職業
+* 牌組類型
+* mana curve
+* 核心卡與協同
+* 強勢回合
+* 可能弱點
+* 與主流牌組相比的差距
+* 建議換牌方向
+
+## 3.2 觀察本週 meta
+
+使用者查看：
+
+* 本週熱門 archetype
+* 主流牌組勝率概況
+* 上週與本週變化
+* 某 archetype 的上升 / 下降
+
+## 3.3 比較自訂牌組與主流牌組
+
+使用者選擇：
+
+* 自己的 deck
+* 一副熱門 deck
+
+系統輸出：
+
+* 曲線差異
+* 結構差異
+* 可能優勢點
+* 可能劣勢點
+* 建議調整項
+
+---
+
+## 4. 系統架構概覽
+
+整體拆成 5 個模組：
+
+### A. Data Sync
+
+負責抓資料、清洗、正規化、落庫。
+
+### B. Deck Core
+
+負責 deck code parsing、卡牌映射、牌組特徵抽取。
+
+### C. Analysis Engine
+
+負責 rule-based 分析、分數計算、相似度比較。
+
+### D. AI Report Layer
+
+負責把結構化分析結果轉成自然語言報告。
+
+### E. API / UI
+
+負責對外服務與查詢。
+
+---
+
+## 5. 技術選型
+
+## 5.1 後端
+
+* Go 1.24+ 或你目前穩定版本
+* HTTP framework：Chi 或 Gin
+  建議 **Chi**，較輕、結構乾淨
+* SQL：PostgreSQL
+* ORM / SQL layer：
+
+  * 建議 `sqlc` 或 `bun`
+  * 若你偏明確 SQL，選 `sqlc`
+* Cache：Redis
+* Config：env + yaml
+* Logging：zap / slog
+* Migrations：golang-migrate
+* Scheduler：
+
+  * MVP 可直接 cron + CLI
+  * 或內建 Go ticker job runner
+
+## 5.2 前端
+
+* MVP 可先：
+
+  * 伺服器端模板
+  * 或極簡 React 前端
+* 如果只是先做驗證，管理頁可先不用很完整
+
+## 5.3 AI
+
+* 外部 LLM API
+* 先保留 provider interface：
+
+  * OpenAI
+  * Ollama
+  * 其他本地 LLM
+
+## 5.4 部署
+
+* Docker Compose
+* 後期再考慮拆：
+
+  * api
+  * worker
+  * db
+  * redis
+
+---
+
+## 6. 專案目錄建議
+
+```text
+hearthstone-analyzer/
+├─ cmd/
+│  ├─ api/
+│  ├─ sync_cards/
+│  ├─ sync_meta/
+│  ├─ analyze_deck/
+│  └─ worker/
+├─ internal/
+│  ├─ app/
+│  ├─ config/
+│  ├─ cards/
+│  ├─ decks/
+│  ├─ meta/
+│  ├─ analysis/
+│  ├─ report/
+│  ├─ llm/
+│  ├─ storage/
+│  ├─ scheduler/
+│  ├─ httpapi/
+│  └─ shared/
+├─ migrations/
+├─ sql/
+├─ web/
+├─ testdata/
+├─ docs/
+├─ deployments/
+│  └─ docker-compose.yml
+└─ Makefile
+```
+
+---
+
+## 7. 模組設計
+
+# 7.1 cards 模組
+
+## 職責
+
+* 抓取卡牌資料
+* 正規化不同來源欄位
+* 落入資料庫
+* 提供查卡能力
+
+## 主要功能
+
+* sync latest cards
+* update existing cards
+* mark collectible
+* locale support
+* standard legality basic tagging
+
+## 核心結構
+
+```go
+type Card struct {
+    ID            string
+    DBFID         int
+    Name          string
+    Class         string
+    CardType      string
+    Set           string
+    Rarity        string
+    Cost          int
+    Attack        *int
+    Health        *int
+    Text          string
+    Flavor        string
+    Artist        string
+    Collectible   bool
+    StandardLegal bool
+    WildLegal     bool
+    Keywords      []string
+    Tribes        []string
+}
+```
+
+---
+
+# 7.2 decks 模組
+
+## 職責
+
+* 解析 deck code
+* 將 deck code 轉成標準 30 張列表
+* 統一 deck schema
+* 提供 feature extraction 原始資料
+
+## 核心結構
+
+```go
+type DeckCard struct {
+    CardID   string
+    Count    int
+    Cost     int
+    CardType string
+    Class    string
+    Tags     []string
+}
+
+type Deck struct {
+    ID         string
+    Name       string
+    Class      string
+    Format     string
+    Source     string
+    DeckCode   string
+    Cards      []DeckCard
+}
+```
+
+## deck parser 輸出
+
+* hero class
+* card list
+* total count
+* legality check result
+
+---
+
+# 7.3 analysis 模組
+
+## 職責
+
+* 對 Deck 做結構化分析
+* 輸出 feature vector
+* 輸出 rule-based 評估
+* 做相似度比對
+
+## 輸出資料結構
+
+```go
+type DeckFeatures struct {
+    AvgCost               float64
+    ManaCurve             map[int]int
+    MinionCount           int
+    SpellCount            int
+    WeaponCount           int
+    DrawCount             int
+    DiscoverCount         int
+    SingleRemovalCount    int
+    AoeCount              int
+    HealCount             int
+    BurstDamageScore      float64
+    EarlyGameScore        float64
+    MidGameScore          float64
+    LateGameScore         float64
+    SynergyScore          float64
+    BrickRiskScore        float64
+    ComboDependencyScore  float64
+    BoardFloodScore       float64
+    ValueGenerationScore  float64
+}
+```
+
+## 分析結果
+
+```go
+type DeckAnalysis struct {
+    Archetype             string
+    Features              DeckFeatures
+    Strengths             []string
+    Weaknesses            []string
+    KeyCards              []string
+    SuggestedCuts         []string
+    SuggestedAdds         []string
+    SimilarMetaDeckIDs    []string
+    Confidence            float64
+}
+```
+
+---
+
+# 7.4 meta 模組
+
+## 職責
+
+* 抓熱門牌組資料
+* 建立 snapshot
+* 保存來源、時間、環境資訊
+* 提供熱門牌組查詢
+
+## 需要記錄的維度
+
+* source
+* fetched_at
+* patch_version
+* format
+* rank bracket
+* region
+* deck name
+* winrate
+* playrate
+* matchup summary
+
+## 重點
+
+所有 meta 資料都要加 snapshot，避免後續分析混到不同 patch 的資料。
+
+---
+
+# 7.5 report 模組
+
+## 職責
+
+* 將 DeckAnalysis 轉成報告
+* 支援 rule-based text report
+* 支援 LLM enhanced report
+
+## 報告分層
+
+### 純規則版
+
+不用 AI，也能直接產出：
+
+* 曲線摘要
+* 結構摘要
+* 初步優勢 / 劣勢
+
+### AI 強化版
+
+輸入：
+
+* deck list
+* features
+* archetype
+* meta comparison result
+
+輸出：
+
+* 一段自然語言總結
+* 對環境適應性的解釋
+* 換牌建議
+
+---
+
+## 8. 資料來源策略
+
+## 8.1 靜態卡牌資料
+
+優先來源：
+
+* HearthstoneJSON
+* 官方卡牌資料頁作為補充
+
+靜態資料抓取頻率：
+
+* 每日一次
+* 或手動觸發
+
+## 8.2 動態 meta 資料
+
+MVP 原則：
+
+* 先做 adapter abstraction
+* 不把整套系統綁死在單一來源
+* 保留原始資料 snapshot
+
+介面建議：
+
+```go
+type CardSource interface {
+    FetchCards(ctx context.Context) ([]Card, error)
+}
+
+type MetaSource interface {
+    FetchMetaSnapshot(ctx context.Context) (*MetaSnapshot, error)
+}
+```
+
+這樣之後換來源時，不會動到分析引擎。
+
+---
+
+## 9. 資料庫設計
+
+下面給你一版 MVP 最小 schema 思路。
+
+# 9.1 cards
+
+```sql
+CREATE TABLE cards (
+    id TEXT PRIMARY KEY,
+    dbf_id INTEGER,
+    class TEXT,
+    card_type TEXT,
+    set_name TEXT,
+    rarity TEXT,
+    cost INTEGER,
+    attack INTEGER NULL,
+    health INTEGER NULL,
+    text TEXT,
+    collectible BOOLEAN NOT NULL DEFAULT FALSE,
+    standard_legal BOOLEAN NOT NULL DEFAULT FALSE,
+    wild_legal BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+# 9.2 card_locales
+
+```sql
+CREATE TABLE card_locales (
+    card_id TEXT NOT NULL REFERENCES cards(id),
+    locale TEXT NOT NULL,
+    name TEXT NOT NULL,
+    text TEXT,
+    PRIMARY KEY (card_id, locale)
+);
+```
+
+# 9.3 decks
+
+```sql
+CREATE TABLE decks (
+    id UUID PRIMARY KEY,
+    source TEXT NOT NULL,
+    external_ref TEXT,
+    name TEXT,
+    class TEXT NOT NULL,
+    format TEXT NOT NULL,
+    deck_code TEXT,
+    archetype TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+# 9.4 deck_cards
+
+```sql
+CREATE TABLE deck_cards (
+    deck_id UUID NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    card_id TEXT NOT NULL REFERENCES cards(id),
+    card_count INTEGER NOT NULL,
+    PRIMARY KEY (deck_id, card_id)
+);
+```
+
+# 9.5 meta_snapshots
+
+```sql
+CREATE TABLE meta_snapshots (
+    id UUID PRIMARY KEY,
+    source TEXT NOT NULL,
+    patch_version TEXT,
+    format TEXT NOT NULL,
+    rank_bracket TEXT,
+    region TEXT,
+    fetched_at TIMESTAMPTZ NOT NULL,
+    raw_payload JSONB
+);
+```
+
+# 9.6 meta_decks
+
+```sql
+CREATE TABLE meta_decks (
+    snapshot_id UUID NOT NULL REFERENCES meta_snapshots(id) ON DELETE CASCADE,
+    deck_id UUID NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    winrate NUMERIC(6,3),
+    playrate NUMERIC(6,3),
+    sample_size INTEGER,
+    tier TEXT,
+    PRIMARY KEY (snapshot_id, deck_id)
+);
+```
+
+# 9.7 deck_analysis_reports
+
+```sql
+CREATE TABLE deck_analysis_reports (
+    id UUID PRIMARY KEY,
+    deck_id UUID NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    based_on_snapshot_id UUID REFERENCES meta_snapshots(id),
+    report_type TEXT NOT NULL,
+    input_hash TEXT NOT NULL,
+    report_json JSONB NOT NULL,
+    report_text TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+## 10. API 設計
+
+以下是 MVP 建議 API。
+
+# 10.1 卡牌資料
+
+### GET /api/cards
+
+* 列出卡牌
+* 支援 class / set / cost 篩選
+
+### GET /api/cards/{id}
+
+* 查單卡
+
+# 10.2 牌組
+
+### POST /api/decks/parse
+
+輸入：
+
+```json
+{
+  "deck_code": "AAECA..."
+}
+```
+
+輸出：
+
+* 職業
+* 牌表
+* legality
+* deck hash
+
+### POST /api/decks/analyze
+
+輸入：
+
+```json
+{
+  "deck_code": "AAECA...",
+  "format": "standard"
+}
+```
+
+輸出：
+
+* 結構化分析
+* 相似熱門牌組
+* 報告文字
+
+### POST /api/decks/compare
+
+輸入：
+
+```json
+{
+  "deck_a": "AAECA...",
+  "deck_b_id": "uuid"
+}
+```
+
+輸出：
+
+* 曲線比較
+* 特徵比較
+* 優劣分析
+
+# 10.3 meta
+
+### GET /api/meta/latest
+
+* 取得最新 snapshot 摘要
+
+### GET /api/meta/decks
+
+* 列出目前熱門牌組
+
+### GET /api/meta/decks/{id}
+
+* 查某副熱門牌組詳情
+
+---
+
+## 11. 分析引擎規則設計
+
+MVP 階段不要一開始碰 ML，先用 deterministic heuristics。
+
+## 11.1 mana curve
+
+計算：
+
+* 每費用牌張數
+* 平均費用
+* 前期密度
+* 高費壓力
+
+### 指標示例
+
+* `early_curve_score`
+* `curve_balance_score`
+* `top_heavy_score`
+
+## 11.2 卡牌類型分布
+
+計算：
+
+* minion
+* spell
+* weapon
+* location / 特殊類型
+
+## 11.3 功能類別標記
+
+每張卡在預處理階段盡量打上功能 tag，例如：
+
+* draw
+* discover
+* burn
+* single_removal
+* aoe
+* heal
+* taunt
+* token
+* deathrattle
+* battlecry
+* mana_cheat
+* combo_piece
+
+然後 deck 層級聚合這些 tag。
+
+## 11.4 archetype 分類規則
+
+初版可這樣：
+
+### Aggro
+
+* 低費密度高
+* 平均費低
+* burn / board flood 分數高
+* late game score 低
+
+### Midrange
+
+* 2~5 費平滑
+* 場面效率高
+* 中期分數高
+
+### Control
+
+* 解牌多
+* 平均費偏高
+* value generation 高
+* late game 高
+
+### Combo
+
+* 過牌濾牌多
+* 特定組件依賴高
+* combo dependency 高
+
+### Hybrid
+
+* 若多項接近，標記為 hybrid archetype
+
+---
+
+## 12. 熱門牌組比較邏輯
+
+比較不是只比卡名重疊，應該至少分三層：
+
+## 12.1 卡牌重疊度
+
+* Jaccard similarity
+* card overlap ratio
+
+## 12.2 結構相似度
+
+比較 feature vector：
+
+* mana curve
+* functional tags
+* archetype score
+* early/mid/late profile
+
+## 12.3 定性比較
+
+產出：
+
+* 你的牌組更貪 / 更快 / 更依賴組件
+* 比主流版本少哪些穩定性來源
+* 比主流版本多哪些風險卡
+
+---
+
+## 13. AI 報告流程
+
+## 13.1 輸入材料
+
+傳給 LLM 的不要是原始資料全塞，而是整理過的：
+
+```json
+{
+  "deck_summary": {...},
+  "features": {...},
+  "archetype": "Midrange Shaman",
+  "meta_context": {
+    "snapshot_date": "2026-03-24",
+    "top_archetypes": [...]
+  },
+  "comparisons": [
+    {
+      "target_deck": "Top Meta Shaman A",
+      "similarity": 0.78,
+      "key_diffs": [...]
+    }
+  ]
+}
+```
+
+## 13.2 輸出要求
+
+* 一段 150~300 字摘要
+* 3 點優勢
+* 3 點劣勢
+* 2~5 個換牌建議
+* 明確區分「根據資料」與「推測」
+
+## 13.3 安全措施
+
+* LLM 不能自己捏造勝率
+* 若沒有 matchup data，要寫「推定」
+* 所有數字應來自分析引擎或資料庫
+
+---
+
+## 14. 排程設計
+
+MVP 先做兩種 job：
+
+## 14.1 sync_cards
+
+頻率：
+
+* 每天 1 次
+
+流程：
+
+1. 抓卡牌來源
+2. 正規化
+3. upsert cards
+4. 寫 raw snapshot
+5. 更新 legality / locale
+
+## 14.2 sync_meta
+
+頻率：
+
+* 每天 1 次或每週 2~3 次
+
+流程：
+
+1. 抓 meta source
+2. 建立 snapshot
+3. upsert decks
+4. 綁定 meta_decks
+5. 重新跑 meta deck features
+6. 更新快取
+
+## 14.3 rebuild_features
+
+頻率：
+
+* 卡牌更新後
+* meta 更新後
+* 手動觸發
+
+---
+
+## 15. CLI 規劃
+
+建議至少有這幾個 command：
+
+```bash
+hsanalyzer sync-cards
+hsanalyzer sync-meta
+hsanalyzer analyze-deck --code "AAECA..."
+hsanalyzer compare-decks --code "AAECA..." --meta-deck-id "<uuid>"
+hsanalyzer rebuild-features
+hsanalyzer serve
+```
+
+這樣很好做本地開發與排程。
+
+---
+
+## 16. Web UI MVP 功能
+
+先做最小可用，不要追求華麗。
+
+### 首頁
+
+* 最新 meta snapshot 時間
+* 主流牌組列表
+
+### 分析頁
+
+* 貼 deck code
+* 顯示分析結果
+* 顯示 mana curve
+* 顯示關鍵卡
+* 顯示相似熱門牌組
+
+### 比較頁
+
+* 選自己牌組
+* 選熱門牌組
+* 顯示差異
+
+### 管理頁
+
+* 手動觸發 sync
+* 看 job 狀態
+* 看 snapshot 記錄
+
+---
+
+## 17. 非功能需求
+
+## 17.1 可維護性
+
+* source adapter 抽象化
+* analysis engine 與 data ingestion 分離
+* llm provider 抽象化
+
+## 17.2 可觀測性
+
+* 每個 sync job 要有 log
+* 記錄成功 / 失敗數
+* 記錄新增 / 更新卡片數
+* 記錄 meta decks 數量
+
+## 17.3 一致性
+
+* 同一 deck code 應產生穩定 hash
+* 相同輸入應可得到相同 rule-based 結果
+
+## 17.4 效能
+
+* 單次 deck 分析應在 1 秒內完成 rule-based 部分
+* AI 報告可以較慢，但要可選擇關閉
+
+---
+
+## 18. 測試策略
+
+## 18.1 單元測試
+
+* deck parser
+* card normalizer
+* feature extractor
+* archetype classifier
+* similarity calculator
+
+## 18.2 整合測試
+
+* sync cards 到 db
+* sync meta 到 db
+* analyze deck API
+
+## 18.3 固定測資
+
+用 `testdata/` 放：
+
+* 幾組已知 deck code
+* 幾份固定 cards JSON
+* 幾份 meta snapshot JSON
+
+這樣 patch 後也能驗證核心邏輯沒壞。
+
+---
+
+## 19. 開發 phase 規劃
+
+## Phase 1：資料底座
+
+完成：
+
+* cards sync
+* DB schema
+* basic card query
+* deck parser
+
+交付：
+
+* 可輸入 deck code，解析成牌表
+
+## Phase 2：分析核心
+
+完成：
+
+* feature extractor
+* archetype classifier
+* rule-based strengths/weaknesses
+
+交付：
+
+* 可輸出結構化分析 JSON
+
+## Phase 3：meta 對照
+
+完成：
+
+* meta sync
+* snapshot 管理
+* similar deck matching
+
+交付：
+
+* 可比對熱門牌組
+
+## Phase 4：AI 報告
+
+完成：
+
+* report prompt builder
+* llm provider
+* report persistence
+
+交付：
+
+* 可生成自然語言報告
+
+## Phase 5：最小 UI
+
+完成：
+
+* deck analysis page
+* meta deck list
+* compare view
+
+交付：
+
+* 可 demo
+
+---
+
+## 20. 風險與對策
+
+## 20.1 meta 資料來源不穩
+
+對策：
+
+* adapter 化
+* raw snapshot 保留
+* source 可替換
+
+## 20.2 卡牌 tag 難以完全正確
+
+對策：
+
+* 先做最重要 tags
+* 允許人工補 tag
+* 規則逐步疊代
+
+## 20.3 archetype 分類不夠準
+
+對策：
+
+* 先輸出 confidence
+* 支援 fallback 為 hybrid
+* 後續用已知 meta decks 校準
+
+## 20.4 LLM 幻覺
+
+對策：
+
+* 只給結構化資料
+* prompt 禁止虛構數字
+* 沒資料就明講推定
+
+---
+
+## 21. 第一版完成標準
+
+MVP 可以視為完成，當以下條件都成立：
+
+* 可每日同步卡牌資料
+* 可同步一批熱門牌組資料
+* 可解析 deck code
+* 可產生 deck feature
+* 可推定 archetype
+* 可找出相似熱門牌組
+* 可產生基本分析報告
+* 可透過 API 查詢結果
+
+---
+
+## 22. 建議的下一步實作順序
+
+最務實的順序是：
+
+1. 建 migrations 與 PostgreSQL schema
+2. 做 `cards` sync
+3. 做 `deck parser`
+4. 做 `feature extractor`
+5. 做 `archetype classifier`
+6. 做 `meta sync adapter`
+7. 做 `compare engine`
+8. 最後接 `LLM report`
+

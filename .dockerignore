@@ -1,0 +1,9 @@
+.git
+.gitignore
+.devcontainer
+OLD-PRD
+bin
+tmp
+coverage.out
+web/node_modules
+data
