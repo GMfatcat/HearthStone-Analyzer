@@ -1,13 +1,13 @@
-# HearthStone Analyzer
+﻿# HearthStone Analyzer
 
-[![Cover](cover.png)](cover.png)
+![Cover](cover.png)
 
-🌐 Language: **English** | [繁體中文](README.zh-TW.md)
+?? Language: **English** | [蝜?銝剜?](README.zh-TW.md)
 
 HearthStone Analyzer is a single-container Hearthstone deck analysis app.
 It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and generates AI reports through an OpenAI-compatible endpoint such as local Ollama.
 
-## ✨ What It Is
+## ??What It Is
 > Quick take: This project helps you go from a raw deck code to structured analysis, meta comparison, and an AI-written report in one place.
 
 - Parse Hearthstone deck codes into card lists with legality checks
@@ -26,7 +26,7 @@ It parses deck codes, runs rule-based analysis, compares your list against store
 - Store report history and reopen previous results
 - Switch the UI between English and Traditional Chinese
 
-## 🧱 Architecture
+## ?妤 Architecture
 > Quick take: The system stays intentionally small and deployable, with one app, one database, and one container.
 
 - Single Go application
@@ -37,7 +37,7 @@ It parses deck codes, runs rule-based analysis, compares your list against store
 
 There is no Redis, PostgreSQL, or multi-service orchestration requirement for the current product shape.
 
-## 🖥️ Main Screens
+## ?儭?Main Screens
 > Quick take: The web UI covers the full working loop from input, to analysis, to compare, to saved reports.
 
 - Deck input with `Parse`, `Analyze`, `Compare`, and `Generate Report`
@@ -48,7 +48,7 @@ There is no Redis, PostgreSQL, or multi-service orchestration requirement for th
 - Jobs control panel
 - Settings page for LLM configuration
 
-## 🎯 Core Features
+## ? Core Features
 > Quick take: Most of the product value is already in place for local use and first deployment.
 
 - Card sync from HearthstoneJSON into local SQLite
@@ -59,7 +59,7 @@ There is no Redis, PostgreSQL, or multi-service orchestration requirement for th
 - Saved report replay
 - Bilingual UI shell
 
-## 🃏 Where To Get Deck Codes
+## ?? Where To Get Deck Codes
 > Quick take: You can copy deck codes from popular Hearthstone sites and paste them directly into the app.
 
 - [Hearthstone Top Decks](https://www.hearthstonetopdecks.com/)
@@ -74,7 +74,7 @@ You can also use this sample deck code for quick testing:
 AAIB8eEEAA-zAY0Qt2ziygLP0QPboASFoQSC5ASL7AWi-gXHpAbd5QaKsQeEAZ4BAA
 ```
 
-## 📚 Project Docs
+## ?? Project Docs
 > Quick take: These docs cover product scope, implementation state, deployment, and backup procedures.
 
 - [README.zh-TW.md](README.zh-TW.md)
@@ -84,7 +84,7 @@ AAIB8eEEAA-zAY0Qt2ziygLP0QPboASFoQSC5ASL7AWi-gXHpAbd5QaKsQeEAZ4BAA
 - [DEPLOYMENT.md](DEPLOYMENT.md)
 - [BACKUP_RESTORE.md](BACKUP_RESTORE.md)
 
-## 🛠️ Local Development
+## ??儭?Local Development
 > Quick take: The repo supports a straightforward Go backend workflow plus a separate Vue frontend build loop.
 
 ### Backend
@@ -177,7 +177,7 @@ go test ./...
 
 If `go test ./...` fails with `web\embed.go: pattern dist/*: no matching files found`, rebuild the frontend first.
 
-## 🔌 API Surface
+## ?? API Surface
 > Quick take: The API already covers settings, cards, decks, jobs, meta snapshots, and report generation.
 
 - `GET /healthz`
@@ -201,7 +201,7 @@ If `go test ./...` fails with `web\embed.go: pattern dist/*: no matching files f
 - `GET /api/meta`
 - `GET /api/meta/{id}`
 
-## 🚀 Deployment
+## ?? Deployment
 > Quick take: The app is designed for simple Docker deployment with a persistent `/data` mount.
 
 For the full deployment guide, see [DEPLOYMENT.md](DEPLOYMENT.md).
@@ -259,7 +259,7 @@ Example valid key:
 m7Kp2Qx9Lr4Vz8Nc1Tw6By3Hs5Df0GaJ
 ```
 
-## 🪟 Windows Docker + Local Ollama
+## ?? Windows Docker + Local Ollama
 > Quick take: This exact path has already been validated locally on Windows.
 
 ### Start the Container
@@ -312,7 +312,7 @@ Then in the app:
 4. Click `Analyze`
 5. Click `Generate Report`
 
-## ✅ First-Start Smoke Test
+## ??First-Start Smoke Test
 > Quick take: These checks confirm the deployed app is healthy end to end.
 
 1. `GET /healthz` returns `ok`
@@ -326,7 +326,7 @@ Then in the app:
 9. Recent report replay works
 10. UI language switch persists after refresh
 
-## 🧪 Validation Status
+## ?妒 Validation Status
 > Quick take: Backend tests, frontend tests, Docker startup, and local Ollama reporting have all been exercised.
 
 Last confirmed verification:
@@ -338,7 +338,7 @@ Last confirmed verification:
 - Windows Docker local deployment
 - Local Ollama report generation
 
-## ⚠️ Known Limitations
+## ?? Known Limitations
 > Quick take: The first release is functional, but some localization and long-tail data polish still remain.
 
 - Some analyze and report wording is still partly English depending on content source
@@ -346,7 +346,7 @@ Last confirmed verification:
 - Frontend automated coverage is still fairly light
 - Scheduler logging and retention are still basic
 
-## 💾 Backup and Restore
+## ? Backup and Restore
 > Quick take: Back up the SQLite file before upgrades so settings, reports, and synced data are safe.
 
 See [BACKUP_RESTORE.md](BACKUP_RESTORE.md).
@@ -356,7 +356,7 @@ At minimum, back up:
 - `/data/hearthstone.db` inside the container
 - Or your host-mounted `data` directory if using a bind mount
 
-## 🧰 Dev Container
+## ?妍 Dev Container
 > Quick take: A dev container is included if you want a more repeatable local toolchain.
 
 The repository includes a Dev Container with:
@@ -366,3 +366,4 @@ The repository includes a Dev Container with:
 - Common build tooling
 
 Use it if you want a consistent local environment for backend and frontend work.
+

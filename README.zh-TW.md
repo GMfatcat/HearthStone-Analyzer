@@ -1,82 +1,65 @@
-# HearthStone Analyzer
+﻿# HearthStone Analyzer
 
-[![Cover](cover.png)](cover.png)
+![Cover](cover.png)
 
-🌐 語言：**繁體中文** | [English](README.md)
+?? 隤?嚗?*蝜?銝剜?** | [English](README.md)
 
-`HearthStone Analyzer` 是一個以單容器部署為目標的 Hearthstone 牌組分析工具。
-它可以解析 deck code、做規則式分析、比對已儲存的 meta 牌組，並透過 OpenAI-compatible API 生成 AI 報告，例如本機 Ollama。
-
-## ✨ 專案是做什麼的
-> 快速理解：這個專案把 deck code、規則分析、meta 比對與 AI 報告整合在同一個工具裡。
-
-- 解析 Hearthstone deck code，並做合法性檢查
-- 執行 deterministic 牌組分析：
-  - archetype 判讀
+`HearthStone Analyzer` ?臭??誑?桀捆?券蝵脩?格???Hearthstone ????撌亙??摰隞亥圾??deck code??閬?撘???撠歇?脣???meta ??嚗蒂?? OpenAI-compatible API ?? AI ?勗?嚗?憒璈?Ollama??
+## ??撠??臬?隞暻潛?
+> 敹恍?閫????獢? deck code?????eta 瘥???AI ?勗??游??典?銝?極?瑁ㄐ??
+- 閫?? Hearthstone deck code嚗蒂??瘜扳炎??- ?瑁? deterministic ????嚗?  - archetype ?方?
   - confidence reasons
   - structural tag explanations
   - package analysis
   - suggested adds / cuts
-- 與已儲存的 meta 牌組比對：
-  - 候選牌組排序
+- ?歇?脣???meta ??瘥?嚗?  - ?????
   - similarity breakdown
   - shared / missing cards diff
-  - merged guidance，包含 source / support / confidence
-- 透過 OpenAI-compatible chat API 生成 AI 牌組報告
-- 儲存報告並可重新開啟歷史結果
-- UI 可一鍵切換英文與繁中
+  - merged guidance嚗???source / support / confidence
+- ?? OpenAI-compatible chat API ?? AI ???勗?
+- ?脣??勗?銝血???甇瑕蝯?
+- UI ?臭??萄????蝜葉
 
-## 🧱 架構
-> 快速理解：系統刻意維持精簡，用單一應用程式和 SQLite 就能完成部署。
-
-- 單一 Go 應用程式
-- Vue 前端編譯後嵌入 Go binary
-- SQLite 單機儲存
+## ?妤 ?嗆?
+> 敹恍?閫??蝟餌絞?餅?蝬剜?蝎曄陛嚗?桐??蝔???SQLite 撠梯摰??函蔡??
+- ?桐? Go ?蝔?
+- Vue ?垢蝺刻陌敺???Go binary
+- SQLite ?格??脣?
 - in-process scheduler
-- 單容器部署
+- ?桀捆?券蝵?
+?桀?銝?閬?Redis?ostgreSQL嚗?憭??楊??
+## ?儭?銝餉??恍
+> 敹恍?閫???桀? UI 撌脩?瘨菔?敺撓?亦?蝯???勗????湔?蝔?
+- Deck input ??`Parse`?Analyze`?Compare`?Generate Report`
+- Analysis 閬?嚗＊蝷?structural ??package ??
+- Compare 閬?嚗＊蝷?candidate decks ??merged guidance
+- Report 閬?嚗?甇瑕?勗?
+- Meta snapshot 璁汗
+- Jobs ?批??- Settings ?嚗靘身摰?LLM
 
-目前不需要 Redis、PostgreSQL，或多服務編排。
-
-## 🖥️ 主要畫面
-> 快速理解：目前 UI 已經涵蓋從輸入牌組到生成報告的完整流程。
-
-- Deck input 與 `Parse`、`Analyze`、`Compare`、`Generate Report`
-- Analysis 視圖，顯示 structural 與 package 分析
-- Compare 視圖，顯示 candidate decks 與 merged guidance
-- Report 視圖，可重播歷史報告
-- Meta snapshot 概覽
-- Jobs 控制頁
-- Settings 頁面，用來設定 LLM
-
-## 🎯 目前核心能力
-> 快速理解：第一版產品主線已經收口，足以支撐本地使用與初版部署。
-
-- 從 HearthstoneJSON 同步卡牌到本地 SQLite
-- 持久化 card metadata 與 functional tags
-- 更細的 Hearthstone-specific package taxonomy
+## ? ?桀??詨??賢?
+> 敹恍?閫??蝚砌???蜓蝺歇蝬???頞喃誑?舀??砍雿輻???蝵脯?
+- 敺?HearthstoneJSON ?郊?∠??唳??SQLite
+- ????card metadata ??functional tags
+- ?渡敦??Hearthstone-specific package taxonomy
 - compare-aware merged guidance
-- 支援本機 Ollama 的 OpenAI-compatible 接法
-- 儲存並重播報告
-- 中英文 UI 切換
+- ?舀?祆? Ollama ??OpenAI-compatible ?交?
+- ?脣?銝阡??剖??- 銝剛??UI ??
 
-## 🃏 Deck Code 從哪裡來
-> 快速理解：你可以直接從主流 Hearthstone 網站複製 deck code 貼進本工具。
-
+## ?? Deck Code 敺鋆∩?
+> 敹恍?閫??雿隞亦?亙?銝餅? Hearthstone 蝬脩?銴ˊ deck code 鞎潮脫撌亙??
 - [Hearthstone Top Decks](https://www.hearthstonetopdecks.com/)
 - [Vicious Syndicate](https://www.vicioussyndicate.com/)
 - [HSReplay](https://hsreplay.net/)
 
-通常頁面上會有 `Copy Deck Code` 按鈕。
-
-你也可以直接用這組測試：
-
+?虜?銝???`Copy Deck Code` ????
+雿??臭誑?湔?券?皜祈岫嚗?
 ```text
 AAIB8eEEAA-zAY0Qt2ziygLP0QPboASFoQSC5ASL7AWi-gXHpAbd5QaKsQeEAZ4BAA
 ```
 
-## 📚 重要文件
-> 快速理解：這些文件分別對應產品規格、進度、部署與備份還原。
-
+## ?? ???辣
+> 敹恍?閫?????辣?撠??Ｗ?閬?脣漲?蝵脰??遢????
 - [README.md](README.md)
 - [PRD_v2.md](PRD_v2.md)
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
@@ -84,39 +67,34 @@ AAIB8eEEAA-zAY0Qt2ziygLP0QPboASFoQSC5ASL7AWi-gXHpAbd5QaKsQeEAZ4BAA
 - [DEPLOYMENT.md](DEPLOYMENT.md)
 - [BACKUP_RESTORE.md](BACKUP_RESTORE.md)
 
-## 🛠️ 本地開發
-> 快速理解：本地開發分成 Go backend 與 Vue frontend 兩條主要工作流。
-
+## ??儭??砍?
+> 敹恍?閫???砍??? Go backend ??Vue frontend ?拇?銝餉?撌乩?瘚?
 ### Backend
-> 快速理解：backend 是標準 Go 專案，測試與啟動流程都很直接。
-
-需求：
+> 敹恍?閫??backend ?舀?皞?Go 撠?嚗葫閰西???瘚??賢??湔??
+?瘙?
 
 - Go 1.21+
 
-常用指令：
-
+撣貊?誘嚗?
 ```bash
 go test ./...
 go run ./cmd/api
 go run ./cmd/sync_cards
 ```
 
-Repo shortcuts：
-
+Repo shortcuts嚗?
 ```bash
 make test
 make build
 make run
 ```
 
-預設值：
+?身?潘?
 
-- HTTP 位址：`:8080`
-- SQLite 路徑：`data/hearthstone.db`
+- HTTP 雿?嚗:8080`
+- SQLite 頝臬?嚗data/hearthstone.db`
 
-常用環境變數：
-
+撣貊?啣?霈嚗?
 - `APP_ADDR`
 - `APP_DB_PATH`
 - `APP_DATA_DIR`
@@ -132,10 +110,8 @@ make run
 - `APP_META_REMOTE_PROFILE`
 
 ### Frontend
-> 快速理解：frontend 用 Vue + Vite，並且需要先 build 出 `web/dist` 給 Go embed 使用。
-
-常用指令：
-
+> 敹恍?閫??frontend ??Vue + Vite嚗蒂銝?閬? build ??`web/dist` 蝯?Go embed 雿輻??
+撣貊?誘嚗?
 ```bash
 cd web
 npm install
@@ -143,8 +119,7 @@ npm test
 npm run build
 ```
 
-Repo shortcuts：
-
+Repo shortcuts嚗?
 ```bash
 make frontend-install
 make frontend-test
@@ -152,21 +127,17 @@ make frontend-build
 make verify
 ```
 
-Windows PowerShell 補充：
-
+Windows PowerShell 鋆?嚗?
 ```powershell
 $env:PATH='C:\Program Files\nodejs;' + $env:PATH
 & 'C:\Program Files\nodejs\npm.cmd' test
 & 'C:\Program Files\nodejs\npm.cmd' run build
 ```
 
-### Build 順序
-> 快速理解：因為 Go 會 embed `web/dist`，所以前端 build 必須先完成。
-
-Go 透過 `web/embed.go` 內嵌 `web/dist`。
-
-建議驗證順序：
-
+### Build ??
+> 敹恍?閫??? Go ??embed `web/dist`嚗?隞亙?蝡?build 敹?????
+Go ?? `web/embed.go` ?批? `web/dist`??
+撱箄降撽???嚗?
 ```bash
 cd web
 npm test
@@ -175,11 +146,9 @@ cd ..
 go test ./...
 ```
 
-如果 `go test ./...` 出現 `web\embed.go: pattern dist/*: no matching files found`，先重新 build frontend。
-
-## 🔌 API 概覽
-> 快速理解：目前 API 已經涵蓋 settings、cards、decks、jobs、meta 與 reports。
-
+憒? `go test ./...` ?箇 `web\embed.go: pattern dist/*: no matching files found`嚗?? build frontend??
+## ?? API 璁汗
+> 敹恍?閫???桀? API 撌脩?瘨菔? settings?ards?ecks?obs?eta ??reports??
 - `GET /healthz`
 - `GET /api/settings`
 - `GET /api/settings/{key}`
@@ -201,30 +170,24 @@ go test ./...
 - `GET /api/meta`
 - `GET /api/meta/{id}`
 
-## 🚀 部署方式
-> 快速理解：部署主線就是 build image，然後把 `/data` 做持久化。
-
-完整部署說明請看 [DEPLOYMENT.md](DEPLOYMENT.md)。
-
+## ?? ?函蔡?孵?
+> 敹恍?閫???函蔡銝餌?撠望 build image嚗敺? `/data` ??銋???
+摰?函蔡隤芣?隢? [DEPLOYMENT.md](DEPLOYMENT.md)??
 ### Docker Build
-> 快速理解：先 build 出同一個 image，後面本地測試和正式部署都能共用。
-
+> 敹恍?閫????build ?箏?銝??image嚗??Ｘ?唳葫閰血?甇???函蔡?質?梁??
 ```bash
 docker build -t hearthstone-analyzer:dev .
 ```
 
-### 基本 Docker 啟動
-> 快速理解：這個方式適合快速試跑，但不會保留資料。
-
+### ?箸 Docker ??
+> 敹恍?閫???撘?翰?岫頝?雿???????
 ```bash
 docker run --rm -p 8080:8080 hearthstone-analyzer:dev
 ```
 
-### 建議的持久化啟動方式
-> 快速理解：正式使用時，請掛 volume 或 bind mount 保留 SQLite 與設定資料。
-
-Named volume：
-
+### 撱箄降??銋????孵?
+> 敹恍?閫??甇??雿輻??隢? volume ??bind mount 靽? SQLite ?身摰???
+Named volume嚗?
 ```bash
 docker volume create hearthstone-data
 
@@ -236,8 +199,7 @@ docker run -d \
   hearthstone-analyzer:dev
 ```
 
-Bind mount：
-
+Bind mount嚗?
 ```bash
 docker run -d \
   --name hearthstone-analyzer \
@@ -247,24 +209,20 @@ docker run -d \
   hearthstone-analyzer:dev
 ```
 
-### `APP_SETTINGS_KEY` 注意事項
-> 快速理解：這個值一定要是原始 32 字元字串，否則加密設定會失效。
+### `APP_SETTINGS_KEY` 瘜冽?鈭?
+> 敹恍?閫???潔?摰??臬?憪?32 摮?摮葡嚗??撖身摰?憭望???
+- 敹??臬?憪?32 摮?摮葡
+- 銝?雿輻 `openssl rand -hex 32` ?Ｙ???64 摮? hex
 
-- 必須是原始 32 字元字串
-- 不要使用 `openssl rand -hex 32` 產生的 64 字元 hex
-
-範例：
-
+蝭?嚗?
 ```text
 m7Kp2Qx9Lr4Vz8Nc1Tw6By3Hs5Df0GaJ
 ```
 
-## 🪟 Windows Docker + 本機 Ollama
-> 快速理解：這條路徑已經在本機 Windows 上完成實測並可正常生成報告。
-
-### 啟動容器
-> 快速理解：build image、掛資料目錄、開放 `8080` 後就能直接進 UI。
-
+## ?? Windows Docker + ?祆? Ollama
+> 敹恍?閫????頝臬?撌脩??冽璈?Windows 銝??祕皜砌蒂?舀迤撣貊????
+### ??摰孵
+> 敹恍?閫??build image??鞈??桅?????`8080` 敺停?賜?仿?UI??
 ```powershell
 cd D:\HearthStone
 docker build -t hearthstone-analyzer:dev .
@@ -277,88 +235,68 @@ docker run -d `
   hearthstone-analyzer:dev
 ```
 
-### UI 內設定 Ollama
-> 快速理解：容器要連回 Windows 主機上的 Ollama，所以 base URL 不能填 `localhost`。
-
+### UI ?扯身摰?Ollama
+> 敹恍?閫??摰孵閬?? Windows 銝餅?銝? Ollama嚗?隞?base URL 銝憛?`localhost`??
 - `llm.base_url = http://host.docker.internal:11434/v1`
 - `llm.api_key = ollama`
-- `llm.model = <你的本機模型名稱>`
+- `llm.model = <雿??祆?璅∪??迂>`
 
-例如：
-
+靘?嚗?
 - `qwen3.5:2b`
 
-為什麼是 `host.docker.internal`：
+?箔?暻潭 `host.docker.internal`嚗?
+- Docker ?抒? `localhost` ??摰孵?芸楛
+- `host.docker.internal` ??? Windows 銝餅?銝? Ollama
 
-- Docker 內的 `localhost` 指向容器自己
-- `host.docker.internal` 才會回到 Windows 主機上的 Ollama
-
-### Ollama 快速驗證
-> 快速理解：先確定模型存在，再從 UI 跑完整 parse 到 report 流程。
-
+### Ollama 敹恍?霅?> 敹恍?閫???Ⅱ摰芋???剁??? UI 頝???parse ??report 瘚???
 ```powershell
 Invoke-RestMethod http://localhost:11434/v1/models
 ```
 
-然後在 UI：
+?嗅???UI嚗?
+1. 頝?`sync_cards`
+2. 鞎潔? deck code
+3. ??`Parse`
+4. ??`Analyze`
+5. ??`Generate Report`
 
-1. 跑 `sync_cards`
-2. 貼上 deck code
-3. 按 `Parse`
-4. 按 `Analyze`
-5. 按 `Generate Report`
-
-## ✅ 首次啟動 Smoke Test
-> 快速理解：這份 checklist 能快速確認部署後的核心能力都有正常運作。
-
-1. `GET /healthz` 回 `ok`
-2. UI 可正常載入
-3. settings 可儲存
-4. `sync_cards` 成功
-5. parse 成功
-6. analyze 成功
-7. compare 在有 meta 時可成功
-8. report 成功
-9. Recent Reports 可重新開啟
-10. 中英切換後 refresh 仍保留語系
-
-## 🧪 驗證狀態
-> 快速理解：目前 backend、frontend、Docker 啟動與本機 Ollama 路徑都已驗過。
-
-最近已確認通過：
-
+## ??擐活?? Smoke Test
+> 敹恍?閫???遢 checklist ?賢翰?Ⅱ隤蝵脣??敹??迤撣賊?雿?
+1. `GET /healthz` ??`ok`
+2. UI ?舀迤撣貉???3. settings ?臬摮?4. `sync_cards` ??
+5. parse ??
+6. analyze ??
+7. compare ?冽? meta ???
+8. report ??
+9. Recent Reports ?舫??圈???10. 銝剛??敺?refresh 隞???蝟?
+## ?妒 撽????> 敹恍?閫???桀? backend?rontend?ocker ???璈?Ollama 頝臬??賢歇撽???
+?餈歇蝣箄???嚗?
 - `go test ./...`
-- `web`：
-  - `npm test`
+- `web`嚗?  - `npm test`
   - `npm run build`
-- Windows Docker 本地部署
-- 本機 Ollama 報告生成
+- Windows Docker ?砍?函蔡
+- ?祆? Ollama ?勗???
 
-## ⚠️ 已知限制
-> 快速理解：第一版已可用，但在中文化與少數資料邊角情況上還有優化空間。
+## ?? 撌脩?
+> 敹恍?閫??蝚砌??歇?舐嚗??其葉?????貉???閫?瘜????芸?蝛粹???
+- `Analyze` ??`Report` 隞??典??批捆?航畾??望?
+- remote meta ??card-name normalization ???? case
+- frontend ?芸?皜祈岫閬?????
+- scheduler logging ??retention 隞??箇?
 
-- `Analyze` 與 `Report` 仍有部分內容可能殘留英文
-- remote meta 的 card-name normalization 還有邊角 case
-- frontend 自動測試覆蓋率仍偏少
-- scheduler logging 與 retention 仍較基礎
+## ? ?遢????> 敹恍?閫???????遢 SQLite嚗靽?閮剖???甇亥????勗?甇瑕??
+隢???[BACKUP_RESTORE.md](BACKUP_RESTORE.md)??
+?喳?閬?隞踝?
 
-## 💾 備份與還原
-> 快速理解：升級前先備份 SQLite，能保住設定、同步資料與報告歷史。
+- 摰孵?抒? `/data/hearthstone.db`
+- ??bind mount ?唬蜓璈???`data` ?桅?
 
-請參考 [BACKUP_RESTORE.md](BACKUP_RESTORE.md)。
-
-至少要備份：
-
-- 容器內的 `/data/hearthstone.db`
-- 或 bind mount 到主機上的 `data` 目錄
-
-## 🧰 Dev Container
-> 快速理解：如果你想讓開發環境更一致，repo 內已經附好 Dev Container。
-
-這個 repo 內建 Dev Container，包含：
+## ?妍 Dev Container
+> 敹恍?閫??憒?雿霈??潛憓銝?湛?repo ?批歇蝬?憟?Dev Container??
+??repo ?批遣 Dev Container嚗??恬?
 
 - Go
 - Node.js
-- 常用 build tooling
+- 撣貊 build tooling
 
-如果你想讓 backend 與 frontend 的本地環境更一致，可以直接使用它。
+憒?雿霈?backend ??frontend ??啁憓銝?湛??臭誑?湔雿輻摰?
