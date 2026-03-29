@@ -11,7 +11,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Single%20Container-2496ED?logo=docker&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-111111)
 
-> 用可部署的單一工具，把 Hearthstone 牌組解析、規則分析、meta 比對與本機 LLM 報告整合在一起。
+> 用可部署的單一工具，把 Hearthstone 牌組解析、規則分析、meta 比對與 LLM 報告整合在一起。
 
 `HearthStone Analyzer` 是一個以單容器部署為目標的 Hearthstone 牌組分析工具。
 它可以解析 deck code、做規則式分析、比對已儲存的 meta 牌組，並透過 OpenAI-compatible API 生成 AI 報告，例如本機 Ollama。
