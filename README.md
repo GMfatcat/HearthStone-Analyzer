@@ -4,27 +4,26 @@
 
 🌐 Language: **English** | [繁體中文](README.zh-TW.md)
 
+![Go](https://img.shields.io/badge/Go-1.21%2B-00ADD8?logo=go&logoColor=white)
+![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vue.js&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF?logo=vite&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Local%20DB-003B57?logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Single%20Container-2496ED?logo=docker&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-111111)
+
 HearthStone Analyzer is a single-container Hearthstone deck analysis app.
 It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and generates AI reports through an OpenAI-compatible endpoint such as local Ollama.
 
 ## 📌 Project Content
 > Quick take: Use this mini table of contents to jump straight to the section you need.
 
-- [What It Is](#-what-it-is)
-- [Architecture](#-architecture)
-- [Main Screens](#️-main-screens)
-- [Core Features](#-core-features)
-- [Where To Get Deck Codes](#-where-to-get-deck-codes)
-- [Project Docs](#-project-docs)
-- [Local Development](#️-local-development)
-- [API Surface](#-api-surface)
-- [Deployment](#-deployment)
-- [Windows Docker + Local Ollama](#-windows-docker--local-ollama)
-- [First-Start Smoke Test](#-first-start-smoke-test)
-- [Validation Status](#-validation-status)
-- [Known Limitations](#️-known-limitations)
-- [Backup and Restore](#-backup-and-restore)
-- [Dev Container](#-dev-container)
+| Build | Run | Operate |
+| --- | --- | --- |
+| [What It Is](#-what-it-is) | [Main Screens](#️-main-screens) | [Deployment](#-deployment) |
+| [Core Features](#-core-features) | [Where To Get Deck Codes](#-where-to-get-deck-codes) | [Windows Docker + Local Ollama](#-windows-docker--local-ollama) |
+| [Architecture](#-architecture) | [API Surface](#-api-surface) | [First-Start Smoke Test](#-first-start-smoke-test) |
+| [Project Docs](#-project-docs) | [Local Development](#️-local-development) | [Validation Status](#-validation-status) |
+| [Backup and Restore](#-backup-and-restore) | [Dev Container](#-dev-container) | [Known Limitations](#️-known-limitations) |
 
 ## ✨ What It Is
 > Quick take: This project takes you from a raw deck code to structured analysis, meta comparison, and an AI-written report in one place.
@@ -50,21 +49,45 @@ It parses deck codes, runs rule-based analysis, compares your list against store
 
 ```mermaid
 flowchart LR
-    UI["Vue Web UI"] --> API["Go API Server"]
-    API --> ANALYSIS["Deck Analysis Engine"]
-    API --> COMPARE["Meta Compare Engine"]
-    API --> REPORT["Report Generator"]
-    API --> JOBS["In-Process Scheduler"]
-    API --> SETTINGS["Settings Service"]
-    ANALYSIS --> DB[("SQLite /data/hearthstone.db")]
-    COMPARE --> DB
-    REPORT --> DB
-    SETTINGS --> DB
-    JOBS --> CARDS["Card Sync"]
-    JOBS --> META["Meta Sync"]
-    CARDS --> EXT1["HearthstoneJSON"]
-    META --> EXT2["Meta Sources"]
-    REPORT --> LLM["OpenAI-Compatible LLM / Ollama"]
+    subgraph User["User Flow"]
+        INPUT["Paste deck code"]
+        ACTIONS["Parse / Analyze / Compare / Report"]
+        HISTORY["Replay saved reports"]
+        INPUT --> ACTIONS --> HISTORY
+    end
+
+    subgraph App["HearthStone Analyzer"]
+        UI["Vue Web UI"]
+        API["Go API Server"]
+        ANALYSIS["Analysis Engine"]
+        COMPARE["Compare Engine"]
+        REPORT["Report Generator"]
+        JOBS["Scheduler Jobs"]
+        SETTINGS["Settings Service"]
+        DB[("SQLite /data/hearthstone.db")]
+
+        UI --> API
+        API --> ANALYSIS
+        API --> COMPARE
+        API --> REPORT
+        API --> JOBS
+        API --> SETTINGS
+        ANALYSIS --> DB
+        COMPARE --> DB
+        REPORT --> DB
+        SETTINGS --> DB
+    end
+
+    subgraph External["External Inputs"]
+        HSJSON["HearthstoneJSON"]
+        META["Meta Sources"]
+        LLM["OpenAI-Compatible LLM / Ollama"]
+    end
+
+    INPUT --> UI
+    JOBS --> HSJSON
+    JOBS --> META
+    REPORT --> LLM
 ```
 
 - Single Go application
@@ -243,6 +266,15 @@ If `go test ./...` fails with `web\embed.go: pattern dist/*: no matching files f
 > Quick take: The app is designed for simple Docker deployment with a persistent `/data` mount.
 
 For the full deployment guide, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Deployment at a Glance
+> Quick take: Build the image, mount `/data`, configure the LLM endpoint, then run a smoke test.
+
+1. Build the Docker image
+2. Start the container with a persistent `/data` mount
+3. Set `APP_SETTINGS_KEY` to a raw 32-character string
+4. Configure Ollama or another OpenAI-compatible endpoint in the UI
+5. Run `sync_cards`, then test parse, analyze, compare, and report
 
 ### Docker Build
 > Quick take: Build one image and use the same artifact for local testing or first deployment.

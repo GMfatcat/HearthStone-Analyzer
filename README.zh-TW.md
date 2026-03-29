@@ -4,27 +4,26 @@
 
 🌐 語言：**繁體中文** | [English](README.md)
 
+![Go](https://img.shields.io/badge/Go-1.21%2B-00ADD8?logo=go&logoColor=white)
+![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vue.js&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF?logo=vite&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Local%20DB-003B57?logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Single%20Container-2496ED?logo=docker&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-111111)
+
 `HearthStone Analyzer` 是一個以單容器部署為目標的 Hearthstone 牌組分析工具。
 它可以解析 deck code、做規則式分析、比對已儲存的 meta 牌組，並透過 OpenAI-compatible API 生成 AI 報告，例如本機 Ollama。
 
 ## 📌 章節導覽
 > 快速理解：這個目錄可以讓你快速跳到需要的章節。
 
-- [專案是做什麼的](#-專案是做什麼的)
-- [架構](#-架構)
-- [主要畫面](#️-主要畫面)
-- [目前核心能力](#-目前核心能力)
-- [Deck Code 從哪裡來](#-deck-code-從哪裡來)
-- [重要文件](#-重要文件)
-- [本地開發](#️-本地開發)
-- [API 概覽](#-api-概覽)
-- [部署方式](#-部署方式)
-- [Windows Docker + 本機 Ollama](#-windows-docker--本機-ollama)
-- [首次啟動 Smoke Test](#-首次啟動-smoke-test)
-- [驗證狀態](#-驗證狀態)
-- [已知限制](#️-已知限制)
-- [備份與還原](#-備份與還原)
-- [Dev Container](#-dev-container)
+| 建置 | 使用 | 維運 |
+| --- | --- | --- |
+| [專案是做什麼的](#-專案是做什麼的) | [主要畫面](#️-主要畫面) | [部署方式](#-部署方式) |
+| [目前核心能力](#-目前核心能力) | [Deck Code 從哪裡來](#-deck-code-從哪裡來) | [Windows Docker + 本機 Ollama](#-windows-docker--本機-ollama) |
+| [架構](#-架構) | [API 概覽](#-api-概覽) | [首次啟動 Smoke Test](#-首次啟動-smoke-test) |
+| [重要文件](#-重要文件) | [本地開發](#️-本地開發) | [驗證狀態](#-驗證狀態) |
+| [備份與還原](#-備份與還原) | [Dev Container](#-dev-container) | [已知限制](#️-已知限制) |
 
 ## ✨ 專案是做什麼的
 > 快速理解：這個專案把 deck code、規則分析、meta 比對與 AI 報告整合在同一個工具裡。
@@ -50,21 +49,45 @@
 
 ```mermaid
 flowchart LR
-    UI["Vue Web UI"] --> API["Go API Server"]
-    API --> ANALYSIS["Deck Analysis Engine"]
-    API --> COMPARE["Meta Compare Engine"]
-    API --> REPORT["Report Generator"]
-    API --> JOBS["In-Process Scheduler"]
-    API --> SETTINGS["Settings Service"]
-    ANALYSIS --> DB[("SQLite /data/hearthstone.db")]
-    COMPARE --> DB
-    REPORT --> DB
-    SETTINGS --> DB
-    JOBS --> CARDS["Card Sync"]
-    JOBS --> META["Meta Sync"]
-    CARDS --> EXT1["HearthstoneJSON"]
-    META --> EXT2["Meta Sources"]
-    REPORT --> LLM["OpenAI-Compatible LLM / Ollama"]
+    subgraph User["使用者流程"]
+        INPUT["貼上 deck code"]
+        ACTIONS["Parse / Analyze / Compare / Report"]
+        HISTORY["重播歷史報告"]
+        INPUT --> ACTIONS --> HISTORY
+    end
+
+    subgraph App["HearthStone Analyzer"]
+        UI["Vue Web UI"]
+        API["Go API Server"]
+        ANALYSIS["Analysis Engine"]
+        COMPARE["Compare Engine"]
+        REPORT["Report Generator"]
+        JOBS["Scheduler Jobs"]
+        SETTINGS["Settings Service"]
+        DB[("SQLite /data/hearthstone.db")]
+
+        UI --> API
+        API --> ANALYSIS
+        API --> COMPARE
+        API --> REPORT
+        API --> JOBS
+        API --> SETTINGS
+        ANALYSIS --> DB
+        COMPARE --> DB
+        REPORT --> DB
+        SETTINGS --> DB
+    end
+
+    subgraph External["外部來源"]
+        HSJSON["HearthstoneJSON"]
+        META["Meta Sources"]
+        LLM["OpenAI-Compatible LLM / Ollama"]
+    end
+
+    INPUT --> UI
+    JOBS --> HSJSON
+    JOBS --> META
+    REPORT --> LLM
 ```
 
 - 單一 Go 應用程式
@@ -243,6 +266,15 @@ go test ./...
 > 快速理解：部署主線就是 build image，然後把 `/data` 做持久化。
 
 完整部署說明請看 [DEPLOYMENT.md](DEPLOYMENT.md)。
+
+### 部署快速版
+> 快速理解：先 build image、掛資料目錄、設定 LLM，再跑一輪 smoke test。
+
+1. 建立 Docker image
+2. 用持久化 `/data` 啟動容器
+3. 把 `APP_SETTINGS_KEY` 設成原始 32 字元字串
+4. 在 UI 內配置 Ollama 或其他 OpenAI-compatible endpoint
+5. 跑 `sync_cards`，再測 parse、analyze、compare、report
 
 ### Docker Build
 > 快速理解：先 build 出同一個 image，後面本地測試和正式部署都能共用。
