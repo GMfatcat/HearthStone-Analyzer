@@ -11,6 +11,8 @@
 ![Docker](https://img.shields.io/badge/Docker-Single%20Container-2496ED?logo=docker&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-111111)
 
+> Analyze Hearthstone decks with deterministic insights, meta comparisons, and local-LLM reporting in one deployable app.
+
 HearthStone Analyzer is a single-container Hearthstone deck analysis app.
 It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and generates AI reports through an OpenAI-compatible endpoint such as local Ollama.
 
@@ -100,6 +102,15 @@ There is no Redis, PostgreSQL, or multi-service orchestration requirement for th
 
 ## 🖥️ Main Screens
 > Quick take: The web UI covers the full working loop from input, to analysis, to compare, to saved reports.
+
+```mermaid
+flowchart LR
+    A["Paste Deck Code"] --> B["Parse"]
+    B --> C["Analyze"]
+    C --> D["Compare"]
+    D --> E["Generate Report"]
+    E --> F["Save and Replay"]
+```
 
 - Deck input with `Parse`, `Analyze`, `Compare`, and `Generate Report`
 - Analysis view with structural and package reads
