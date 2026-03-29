@@ -7,6 +7,25 @@
 HearthStone Analyzer is a single-container Hearthstone deck analysis app.
 It parses deck codes, runs rule-based analysis, compares your list against stored meta decks, and generates AI reports through an OpenAI-compatible endpoint such as local Ollama.
 
+## 📌 Project Content
+> Quick take: Use this mini table of contents to jump straight to the section you need.
+
+- [What It Is](#-what-it-is)
+- [Architecture](#-architecture)
+- [Main Screens](#️-main-screens)
+- [Core Features](#-core-features)
+- [Where To Get Deck Codes](#-where-to-get-deck-codes)
+- [Project Docs](#-project-docs)
+- [Local Development](#️-local-development)
+- [API Surface](#-api-surface)
+- [Deployment](#-deployment)
+- [Windows Docker + Local Ollama](#-windows-docker--local-ollama)
+- [First-Start Smoke Test](#-first-start-smoke-test)
+- [Validation Status](#-validation-status)
+- [Known Limitations](#️-known-limitations)
+- [Backup and Restore](#-backup-and-restore)
+- [Dev Container](#-dev-container)
+
 ## ✨ What It Is
 > Quick take: This project takes you from a raw deck code to structured analysis, meta comparison, and an AI-written report in one place.
 
@@ -28,6 +47,25 @@ It parses deck codes, runs rule-based analysis, compares your list against store
 
 ## 🧱 Architecture
 > Quick take: The system stays intentionally small and deployable, with one app, one database, and one container.
+
+```mermaid
+flowchart LR
+    UI["Vue Web UI"] --> API["Go API Server"]
+    API --> ANALYSIS["Deck Analysis Engine"]
+    API --> COMPARE["Meta Compare Engine"]
+    API --> REPORT["Report Generator"]
+    API --> JOBS["In-Process Scheduler"]
+    API --> SETTINGS["Settings Service"]
+    ANALYSIS --> DB[("SQLite /data/hearthstone.db")]
+    COMPARE --> DB
+    REPORT --> DB
+    SETTINGS --> DB
+    JOBS --> CARDS["Card Sync"]
+    JOBS --> META["Meta Sync"]
+    CARDS --> EXT1["HearthstoneJSON"]
+    META --> EXT2["Meta Sources"]
+    REPORT --> LLM["OpenAI-Compatible LLM / Ollama"]
+```
 
 - Single Go application
 - Vue frontend embedded into the Go binary

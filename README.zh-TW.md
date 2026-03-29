@@ -7,6 +7,25 @@
 `HearthStone Analyzer` 是一個以單容器部署為目標的 Hearthstone 牌組分析工具。
 它可以解析 deck code、做規則式分析、比對已儲存的 meta 牌組，並透過 OpenAI-compatible API 生成 AI 報告，例如本機 Ollama。
 
+## 📌 章節導覽
+> 快速理解：這個目錄可以讓你快速跳到需要的章節。
+
+- [專案是做什麼的](#-專案是做什麼的)
+- [架構](#-架構)
+- [主要畫面](#️-主要畫面)
+- [目前核心能力](#-目前核心能力)
+- [Deck Code 從哪裡來](#-deck-code-從哪裡來)
+- [重要文件](#-重要文件)
+- [本地開發](#️-本地開發)
+- [API 概覽](#-api-概覽)
+- [部署方式](#-部署方式)
+- [Windows Docker + 本機 Ollama](#-windows-docker--本機-ollama)
+- [首次啟動 Smoke Test](#-首次啟動-smoke-test)
+- [驗證狀態](#-驗證狀態)
+- [已知限制](#️-已知限制)
+- [備份與還原](#-備份與還原)
+- [Dev Container](#-dev-container)
+
 ## ✨ 專案是做什麼的
 > 快速理解：這個專案把 deck code、規則分析、meta 比對與 AI 報告整合在同一個工具裡。
 
@@ -28,6 +47,25 @@
 
 ## 🧱 架構
 > 快速理解：系統刻意維持精簡，用單一應用程式和 SQLite 就能完成部署。
+
+```mermaid
+flowchart LR
+    UI["Vue Web UI"] --> API["Go API Server"]
+    API --> ANALYSIS["Deck Analysis Engine"]
+    API --> COMPARE["Meta Compare Engine"]
+    API --> REPORT["Report Generator"]
+    API --> JOBS["In-Process Scheduler"]
+    API --> SETTINGS["Settings Service"]
+    ANALYSIS --> DB[("SQLite /data/hearthstone.db")]
+    COMPARE --> DB
+    REPORT --> DB
+    SETTINGS --> DB
+    JOBS --> CARDS["Card Sync"]
+    JOBS --> META["Meta Sync"]
+    CARDS --> EXT1["HearthstoneJSON"]
+    META --> EXT2["Meta Sources"]
+    REPORT --> LLM["OpenAI-Compatible LLM / Ollama"]
+```
 
 - 單一 Go 應用程式
 - Vue 前端編譯後嵌入 Go binary
