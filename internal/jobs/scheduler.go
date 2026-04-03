@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -191,6 +192,9 @@ func (e *Engine) runScheduledJob(ctx context.Context, job Job, now time.Time) er
 	}); err != nil {
 		return err
 	}
+
+	logJobExecution("scheduled", job.Key, status, startedAt, finishedAt, result.RecordsAffected, errorMessage)
+	slog.Info("scheduled job advanced", "job_key", job.Key, "next_run_at", nextRunAt.Format(time.RFC3339))
 
 	return nil
 }

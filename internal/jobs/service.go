@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -255,6 +256,8 @@ func (s *Service) RunNow(ctx context.Context, key string) error {
 		return err
 	}
 
+	logJobExecution("manual", key, status, startedAt, finishedAt, result.RecordsAffected, errorMessage)
+
 	return runErr
 }
 
@@ -312,4 +315,23 @@ func toJob(job sqliteStore.ScheduledJob) Job {
 		NextRunAt: job.NextRunAt,
 		UpdatedAt: job.UpdatedAt,
 	}
+}
+
+func logJobExecution(trigger string, jobKey string, status string, startedAt time.Time, finishedAt time.Time, recordsAffected *int64, errorMessage *string) {
+	attrs := []any{
+		"trigger", trigger,
+		"job_key", jobKey,
+		"status", status,
+		"started_at", startedAt.Format(time.RFC3339),
+		"finished_at", finishedAt.Format(time.RFC3339),
+	}
+	if recordsAffected != nil {
+		attrs = append(attrs, "records_affected", *recordsAffected)
+	}
+	if errorMessage != nil && strings.TrimSpace(*errorMessage) != "" {
+		attrs = append(attrs, "error", *errorMessage)
+		slog.Error("job execution failed", attrs...)
+		return
+	}
+	slog.Info("job execution finished", attrs...)
 }
