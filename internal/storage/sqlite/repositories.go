@@ -433,7 +433,15 @@ INSERT INTO meta_snapshots (
     fetched_at,
     raw_payload
 )
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    source = excluded.source,
+    patch_version = excluded.patch_version,
+    format = excluded.format,
+    rank_bracket = excluded.rank_bracket,
+    region = excluded.region,
+    fetched_at = excluded.fetched_at,
+    raw_payload = excluded.raw_payload;
 `
 	if _, err := r.db.ExecContext(
 		ctx,

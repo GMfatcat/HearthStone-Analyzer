@@ -51,6 +51,67 @@ func TestSyncServicePersistsSnapshot(t *testing.T) {
 	}
 }
 
+func TestSyncServiceCanReSyncIdenticalSnapshot(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	db := openMetaTestDB(t)
+	repos := sqliteStore.NewRepositories(db)
+	service := NewSyncServiceWithDeckPersistence(repos.MetaSnapshots, repos.Decks, repos.MetaDecks, repos.Cards, repos.DeckCards, stubSource{
+		result: FetchResult{
+			Source:       "remote",
+			PatchVersion: "32.4.0",
+			Format:       "standard",
+			FetchedAt:    time.Date(2026, 3, 26, 10, 0, 0, 0, time.UTC),
+			RawPayload: `{
+  "decks": [
+    {
+      "id": "cycle-rogue",
+      "name": "Cycle Rogue",
+      "class": "ROGUE",
+      "playrate": 0.12,
+      "winrate": 0.51,
+      "sample_size": 2450,
+      "tier": "T1"
+    }
+  ]
+}`,
+		},
+	})
+
+	first, err := service.Sync(ctx)
+	if err != nil {
+		t.Fatalf("Sync(first) error = %v", err)
+	}
+
+	second, err := service.Sync(ctx)
+	if err != nil {
+		t.Fatalf("Sync(second) error = %v", err)
+	}
+
+	if first.ID != second.ID {
+		t.Fatalf("expected identical snapshot ids across repeated sync, got %q and %q", first.ID, second.ID)
+	}
+
+	list, err := repos.MetaSnapshots.ListByFormat(ctx, "standard", 10)
+	if err != nil {
+		t.Fatalf("ListByFormat() error = %v", err)
+	}
+
+	if len(list) != 1 {
+		t.Fatalf("expected one snapshot row after re-sync, got %d", len(list))
+	}
+
+	items, err := repos.MetaDecks.ListBySnapshotID(ctx, first.ID)
+	if err != nil {
+		t.Fatalf("ListBySnapshotID() error = %v", err)
+	}
+
+	if len(items) != 1 {
+		t.Fatalf("expected one meta deck mapping after re-sync, got %d", len(items))
+	}
+}
+
 func TestSyncServiceReturnsSourceFailureWithoutPersisting(t *testing.T) {
 	t.Parallel()
 

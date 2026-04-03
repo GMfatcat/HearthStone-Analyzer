@@ -267,6 +267,52 @@ func TestMetaSnapshotsRepositoryListByFormatAndGetByID(t *testing.T) {
 	}
 }
 
+func TestMetaSnapshotsRepositoryCreateUpdatesExistingSnapshotID(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	db := openTestDB(t)
+	repo := NewMetaSnapshotsRepository(db)
+
+	firstFetchedAt := time.Date(2026, 3, 24, 10, 0, 0, 0, time.UTC)
+	updatedFetchedAt := time.Date(2026, 3, 25, 11, 30, 0, 0, time.UTC)
+
+	if err := repo.Create(ctx, MetaSnapshot{
+		ID:           "snapshot-1",
+		Source:       "stub",
+		PatchVersion: "32.0.0",
+		Format:       "standard",
+		FetchedAt:    firstFetchedAt,
+		RawPayload:   `{"items":1}`,
+	}); err != nil {
+		t.Fatalf("Create(first) error = %v", err)
+	}
+
+	if err := repo.Create(ctx, MetaSnapshot{
+		ID:           "snapshot-1",
+		Source:       "remote",
+		PatchVersion: "32.0.1",
+		Format:       "standard",
+		FetchedAt:    updatedFetchedAt,
+		RawPayload:   `{"items":2}`,
+	}); err != nil {
+		t.Fatalf("Create(update) error = %v", err)
+	}
+
+	found, err := repo.GetByID(ctx, "snapshot-1")
+	if err != nil {
+		t.Fatalf("GetByID() error = %v", err)
+	}
+
+	if found.Source != "remote" || found.PatchVersion != "32.0.1" {
+		t.Fatalf("expected updated snapshot fields, got %+v", found)
+	}
+
+	if !found.FetchedAt.Equal(updatedFetchedAt) || found.RawPayload != `{"items":2}` {
+		t.Fatalf("expected updated snapshot payload, got %+v", found)
+	}
+}
+
 func TestDecksRepositoryUpsertMetaDeckAndMetaDecksReplaceSnapshotDecks(t *testing.T) {
 	t.Parallel()
 
