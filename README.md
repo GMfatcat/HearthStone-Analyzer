@@ -396,6 +396,22 @@ docker run -d `
   hearthstone-analyzer:dev
 ```
 
+Start the container with local Ollama plus remote meta sync:
+
+```powershell
+cd D:\HearthStone
+docker build -t hearthstone-analyzer:dev .
+
+docker run -d `
+  --name hearthstone-analyzer `
+  -p 8080:8080 `
+  -e APP_SETTINGS_KEY=m7Kp2Qx9Lr4Vz8Nc1Tw6By3Hs5Df0GaJ `
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate `
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ `
+  -v D:\HearthStone\data:/data `
+  hearthstone-analyzer:dev
+```
+
 ### Configure Ollama in the UI
 > Quick take: Point the app at the host machine through `host.docker.internal`, not `localhost`.
 

@@ -396,6 +396,22 @@ docker run -d `
   hearthstone-analyzer:dev
 ```
 
+同時啟用本機 Ollama 與遠端 meta sync 的啟動方式：
+
+```powershell
+cd D:\HearthStone
+docker build -t hearthstone-analyzer:dev .
+
+docker run -d `
+  --name hearthstone-analyzer `
+  -p 8080:8080 `
+  -e APP_SETTINGS_KEY=m7Kp2Qx9Lr4Vz8Nc1Tw6By3Hs5Df0GaJ `
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate `
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ `
+  -v D:\HearthStone\data:/data `
+  hearthstone-analyzer:dev
+```
+
 ### UI 內設定 Ollama
 > 快速理解：容器要連回 Windows 主機上的 Ollama，所以 base URL 不能填 `localhost`。
 
