@@ -301,6 +301,16 @@ docker build -t hearthstone-analyzer:dev .
 docker run --rm -p 8080:8080 hearthstone-analyzer:dev
 ```
 
+Basic Docker run with remote meta sync enabled:
+
+```bash
+docker run --rm \
+  -p 8080:8080 \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
+  hearthstone-analyzer:dev
+```
+
 ### Recommended Persistent Run
 > Quick take: Use a volume or bind mount so the SQLite database and saved settings survive restarts.
 
@@ -324,6 +334,34 @@ docker run -d \
   --name hearthstone-analyzer \
   -p 8080:8080 \
   -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -v /absolute/host/path:/data \
+  hearthstone-analyzer:dev
+```
+
+Named volume with remote meta sync enabled:
+
+```bash
+docker volume create hearthstone-data
+
+docker run -d \
+  --name hearthstone-analyzer \
+  -p 8080:8080 \
+  -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
+  -v hearthstone-data:/data \
+  hearthstone-analyzer:dev
+```
+
+Bind mount with remote meta sync enabled:
+
+```bash
+docker run -d \
+  --name hearthstone-analyzer \
+  -p 8080:8080 \
+  -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
   -v /absolute/host/path:/data \
   hearthstone-analyzer:dev
 ```

@@ -301,6 +301,16 @@ docker build -t hearthstone-analyzer:dev .
 docker run --rm -p 8080:8080 hearthstone-analyzer:dev
 ```
 
+啟用遠端 meta sync 的基本啟動方式：
+
+```bash
+docker run --rm \
+  -p 8080:8080 \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
+  hearthstone-analyzer:dev
+```
+
 ### 建議的持久化啟動方式
 > 快速理解：正式使用時，請掛 volume 或 bind mount 保留 SQLite 與設定資料。
 
@@ -324,6 +334,34 @@ docker run -d \
   --name hearthstone-analyzer \
   -p 8080:8080 \
   -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -v /absolute/host/path:/data \
+  hearthstone-analyzer:dev
+```
+
+啟用遠端 meta sync 的 named volume 啟動方式：
+
+```bash
+docker volume create hearthstone-data
+
+docker run -d \
+  --name hearthstone-analyzer \
+  -p 8080:8080 \
+  -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
+  -v hearthstone-data:/data \
+  hearthstone-analyzer:dev
+```
+
+啟用遠端 meta sync 的 bind mount 啟動方式：
+
+```bash
+docker run -d \
+  --name hearthstone-analyzer \
+  -p 8080:8080 \
+  -e APP_SETTINGS_KEY=replace-with-32-char-secret \
+  -e APP_META_REMOTE_PROFILE=vicioussyndicate \
+  -e APP_META_REMOTE_URL=https://www.vicioussyndicate.com/tag/meta/ \
   -v /absolute/host/path:/data \
   hearthstone-analyzer:dev
 ```
