@@ -393,6 +393,60 @@ Then in the app:
 4. Click `Analyze`
 5. Click `Generate Report`
 
+## OpenRouter Example
+> Quick take: OpenRouter works with the current OpenAI-compatible provider path, including free models that expose the chat completions API.
+
+### Configure OpenRouter in the UI
+> Quick take: Use the OpenRouter `/api/v1` base URL because the app appends `/chat/completions` automatically.
+
+Open `http://localhost:8080` and set:
+
+- `llm.base_url = https://openrouter.ai/api/v1`
+- `llm.api_key = <your-openrouter-api-key>`
+- `llm.model = qwen/qwen3.6-plus:free`
+
+Notes:
+
+- Keep the base URL at `/api/v1`; do not enter `https://openrouter.ai` by itself
+- Even for a `:free` model, OpenRouter still requires an API key
+- No code changes are required because the app already uses an OpenAI-compatible chat completion client
+
+### Validate OpenRouter
+> Quick take: First confirm your OpenRouter key can reach the selected model, then run the same parse-to-report flow in the app.
+
+PowerShell quick check:
+
+```powershell
+$headers = @{
+  Authorization = "Bearer <your-openrouter-api-key>"
+  "Content-Type" = "application/json"
+}
+
+$body = @{
+  model = "qwen/qwen3.6-plus:free"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with the single word ok."
+    }
+  )
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri https://openrouter.ai/api/v1/chat/completions `
+  -Headers $headers `
+  -Body $body
+```
+
+Then in the app:
+
+1. Run `sync_cards`
+2. Paste a deck code
+3. Click `Parse`
+4. Click `Analyze`
+5. Click `Generate Report`
+
 ## ✅ First-Start Smoke Test
 > Quick take: These checks confirm the deployed app is healthy end to end.
 

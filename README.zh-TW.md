@@ -389,6 +389,60 @@ Invoke-RestMethod http://localhost:11434/v1/models
 4. 按 `Analyze`
 5. 按 `Generate Report`
 
+## OpenRouter 範例
+> 快速理解：目前這套 OpenAI-compatible provider 路徑可直接接 OpenRouter，包括提供 chat completions API 的 free model。
+
+### UI 內設定 OpenRouter
+> 快速理解：base URL 要填到 OpenRouter 的 `/api/v1`，因為程式會自動再補上 `/chat/completions`。
+
+開啟 `http://localhost:8080` 後設定：
+
+- `llm.base_url = https://openrouter.ai/api/v1`
+- `llm.api_key = <你的 OpenRouter API key>`
+- `llm.model = qwen/qwen3.6-plus:free`
+
+注意事項：
+
+- `base_url` 要停在 `/api/v1`，不要只填 `https://openrouter.ai`
+- 即使是 `:free` model，OpenRouter 仍然需要 API key
+- 不需要修改程式碼，因為目前已經是 OpenAI-compatible chat completions client
+
+### OpenRouter 快速驗證
+> 快速理解：先確認 API key 能打到指定模型，再到 UI 跑同一套 parse 到 report 流程。
+
+PowerShell 快速測試：
+
+```powershell
+$headers = @{
+  Authorization = "Bearer <你的 OpenRouter API key>"
+  "Content-Type" = "application/json"
+}
+
+$body = @{
+  model = "qwen/qwen3.6-plus:free"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with the single word ok."
+    }
+  )
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri https://openrouter.ai/api/v1/chat/completions `
+  -Headers $headers `
+  -Body $body
+```
+
+然後在 UI：
+
+1. 跑 `sync_cards`
+2. 貼上 deck code
+3. 按 `Parse`
+4. 按 `Analyze`
+5. 按 `Generate Report`
+
 ## ✅ 首次啟動 Smoke Test
 > 快速理解：這份 checklist 能快速確認部署後的核心能力都有正常運作。
 
